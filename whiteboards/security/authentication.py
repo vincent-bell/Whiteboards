@@ -1,13 +1,14 @@
 	# absolute imports
 import os
-import subprocess as subproc
+import subprocess
 import xlrd
+import xlwt
 import pandas as pd
 from pathlib import Path
 try:
 	from cryptography.fernet import Fernet
 except ModuleNotFoundError:
-	subproc.call(['pip', 'install', 'cryptography'])
+	subprocess.call(['pip', 'install', 'cryptography'])
 	from cryptography.fernet import Fernet
 
 # relative imports
@@ -21,9 +22,7 @@ WARNING = "[Security Warning] You must link the new key in others/whiteboards/se
 
 class Authenticator:
 	"""
-	Class to handle the authentication of users for whiteboards app.
-	Handling of userdata is designed to be secure and symmetric 
-	encryption is used in order to cope with this.
+	class to handle the authentication and sign up of users for the whiteboards app.
 	:param key: bytes
 	:return: None
 	"""
@@ -32,7 +31,7 @@ class Authenticator:
 			'whiteboards', 'security', 'unlock.key'
 		)
 		self.userdata_path = os.path.join(
-			'whiteboards', 'userdata', 'enc_users.xls'
+			'whiteboards', 'userdata', 'new_users.xls'
 		)
 		
 		if key:
@@ -60,16 +59,8 @@ class Authenticator:
 		:param outpath: Path
 		:return: None
 		"""
-		# if an outpath is not specified then set it to original location with name enc_{filename}.ext
 		if not outpath:
-			outpath = ""
-			outpath_file = 'enc_{f}'.format(f=file_path.split('/')[-1])
-			path_parts = file_path.split('/')[0:-1]
-			for part in path_parts:
-				outpath = os.path.join(outpath + part + '/')
-			outpath.join(path_parts)
-			outpath = outpath + outpath_file
-			print(f'{outpath=}, {type(outpath)}')
+			NotImplemented
 
 		lock = Fernet(self.__key)
 				
@@ -104,6 +95,10 @@ class Authenticator:
 		userdata = self.decrypt_file(target=self.userdata_path)
 		dataframe = pd.read_excel(userdata, engine='xlrd')
 		self.__dataframe = dataframe
+		for col in self.__dataframe.columns:
+			if 'Unnamed' in col:
+				self.__dataframe = self.__dataframe.drop(labels=[col], axis=1)
+		print(self.__dataframe)
 
 
 	def authenticate(self, username: str, password: str):
@@ -120,3 +115,55 @@ class Authenticator:
 			if username == working_user and password == working_pass:
 				return True
 		return None
+
+	def sign_up(self, username: str, password: str, password_conf: str):
+		"""
+		method attempts to sign up a user with the information supplied
+		:param username: str
+		:param password: str
+		:param password_conf: str
+		:param canvas: object
+		:return: state: None or True, e_type: str
+		"""
+		NUMBERS = "0123456789"
+
+		if len(username) < 6:
+			return None, 'INV_USER_LEN'
+
+		for character in username:
+			if ord(character) in range(65, 91) or ord(character) in range(97, 123) or character in NUMBERS:
+				pass
+			else:
+				return None, 'ALPHABET_E'
+
+		data_len = len(self.__dataframe)
+		for userid in range(data_len):
+			existing_user = self.__dataframe.username[userid]
+			if username == existing_user:
+				return None, 'A_EXIST' 
+
+		if len(password) < 8:
+			return None, 'INV_PASS_LEN'
+
+		if not password == password_conf:
+			return None, 'PASS_NE'
+
+		new_user_dict = {'username': username, 'password': password}
+		self.__dataframe.append(new_user_dict, ignore_index=True)
+
+		subprocess.call(['rm', 'C://Users/vince/Desktop/Team-4/whiteboards/userdata/new_users.xls'])
+
+		subprocess.call(['touch', 'C://Users/vince/Desktop/Team-4/whiteboards/userdata/new_users.xls'])
+
+		self.__dataframe.to_excel(
+			os.path.join('whiteboards', 'userdata', 'new_users.xls'),
+			engine='xlwt'
+		)
+
+		self.encrypt_file(target=os.path.join('whiteboards', 'userdata', 'new_users.xls'), outpath=os.path.join('whiteboards', 'userdata', 'new_users.xls'))
+
+		
+		# TODO: Add the username and password to the current dataframe, encrypt it and rewrite the current file enc_users.xls
+		# TODO: Research saving dataframes and adding entries before git flow finishing the feature
+
+		return True, None
