@@ -1,6 +1,7 @@
 # absolute imports
 import os
 from tkinter import Tk, Toplevel, Canvas, PhotoImage, Entry, Button, messagebox
+from guizero import App
 
 # relative imports
 from .whiteboard import WhiteboardInstance
@@ -12,13 +13,16 @@ for now a valid user is: {username = "test", password = "test"}
 
 
 class WhiteboardApp(Tk):
-	def __init__(self, base_widget):
+	def __init__(self, base_widget: App = None):
 		super().__init__()
 		self.authenticator = Authenticator()
 		self.authenticator.decrypt_dataframe()
-		self.base_widget = base_widget
+
 		self.assets_path = os.path.join('others', 'whiteboards', 'assets')
-		self.base_widget.disable()
+
+		if base_widget:
+			self.base_widget = base_widget
+			self.base_widget.disable()
 
 
 	def __call__(self):
@@ -34,7 +38,8 @@ class WhiteboardApp(Tk):
 		method to call when window is closed
 		:return: None
 		"""
-		self.base_widget.enable()
+		if self.base_widget:
+			self.base_widget.enable()
 		self.destroy()
 
 

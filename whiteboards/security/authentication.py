@@ -29,10 +29,10 @@ class Authenticator:
 	"""
 	def __init__(self, key: bytes = os.environ.get(DATA_KEY)):
 		self.key_path = os.path.join(
-			'others', 'whiteboards', 'security', 'unlock.key'
+			'whiteboards', 'security', 'unlock.key'
 		)
 		self.userdata_path = os.path.join(
-			'others', 'whiteboards', 'userdata', 'enc_users.xls'
+			'whiteboards', 'userdata', 'enc_users.xls'
 		)
 		
 		if key:
