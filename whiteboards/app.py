@@ -18,11 +18,13 @@ class WhiteboardApp(Tk):
 		self.authenticator = Authenticator()
 		self.authenticator.decrypt_dataframe()
 
-		self.assets_path = os.path.join('others', 'whiteboards', 'assets')
+		self.assets_path = os.path.join('whiteboards', 'assets')
 
 		if base_widget:
 			self.base_widget = base_widget
 			self.base_widget.disable()
+		else:
+			self.base_widget = None
 
 
 	def __call__(self):

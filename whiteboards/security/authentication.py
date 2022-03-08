@@ -14,7 +14,7 @@ except ModuleNotFoundError:
 from ..utils.errors import SecurityError
 
 
-DATA_KEY = 'SECRET KEY'
+DATA_KEY = 'SECRET_KEY'
 ENCODING_FORMAT = 'utf-8'
 WARNING = "[Security Warning] You must link the new key in others/whiteboards/security/unlock.key"
 

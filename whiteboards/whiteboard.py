@@ -24,7 +24,8 @@ class WhiteboardInstance(Tk):
 		method to call when window is closed
 		:return: None
 		"""
-		self.instantiator.base_widget.enable()
+		if self.instantiator.base_widget:
+			self.instantiator.base_widget.enable()
 		self.destroy()
 
 
