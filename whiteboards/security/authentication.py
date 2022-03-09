@@ -5,6 +5,7 @@ import xlrd
 import xlwt
 import pandas as pd
 from pathlib import Path
+from typing import Tuple
 try:
 	from cryptography.fernet import Fernet
 except ModuleNotFoundError:
@@ -30,8 +31,8 @@ class Authenticator:
 		self.key_path = os.path.join(
 			'whiteboards', 'security', 'unlock.key'
 		)
-		self.userdata_path = os.path.join(
-			'whiteboards', 'userdata', 'new_users.xls'
+		self.userdata_file = os.path.join(
+			'whiteboards', 'userdata', 'enc_users.xls'
 		)
 		
 		if key:
@@ -41,7 +42,7 @@ class Authenticator:
 			raise SecurityError(WARNING)
 
 
-	def make_new_key(self):
+	def make_new_key(self) -> None:
 		"""
 		method generates a new key and writes it to the path in self.key_path
 		:return: None
@@ -51,28 +52,30 @@ class Authenticator:
 			unlock.write(key)
 
 
-	def encrypt_file(self, target: Path, outpath: Path = None):
+	def encrypt_file(self, target: Path, outpath: Path = None) -> None:
 		"""
 		method encrypts a file specified in file_path with a key specified
-		in key and writes the contents to outpath
+		in key and writes the contents to either a specified outpath or the original file
 		:param file_path: Path
 		:param outpath: Path
 		:return: None
 		"""
-		if not outpath:
-			NotImplemented
 
 		lock = Fernet(self.__key)
 				
 		with open(target, 'rb') as file:
 			file_contents = file.read()
 		encrypted_file_contents = lock.encrypt(file_contents)
-			
-		with open(outpath, 'wb') as outfile:
-			outfile.write(encrypted_file_contents)
+		
+		if outpath:
+			with open(outpath, 'wb') as file:
+				file.write(encrypted_file_contents)
+		else:
+			with open(target, 'wb') as file:
+				file.write(encrypted_file_contents)
 
 
-	def decrypt_file(self, target: Path) -> bytes:
+	def decrypt_file(self, target: Path) -> None:
 		"""
 		method decrypts the file in file_path with the key specified in key
 		set self.key once an unlock.key file is set? 
@@ -83,25 +86,33 @@ class Authenticator:
 		with open(target, 'rb') as file:
 			file_contents = file.read()
 		decrypted_file_contents = unlock.decrypt(file_contents)
-		return decrypted_file_contents
+		with open(target, 'wb') as file:
+			file.write(decrypted_file_contents)
 
 
-	def decrypt_dataframe(self):
+	def decrypt_dataframe(self) -> None:
 		"""
-		method decrypts the userdata and creates a pandas dataframe
-		then stores the dataframe in a private attr: self.__dataframe
+		method sets up self.__dataframe
 		:return: None
 		"""
-		userdata = self.decrypt_file(target=self.userdata_path)
-		dataframe = pd.read_excel(userdata, engine='xlrd')
+		self.decrypt_file(target=self.userdata_file)
+		dataframe = pd.read_excel(self.userdata_file, engine='xlrd')
+		self.encrypt_file(target=self.userdata_file)
 		self.__dataframe = dataframe
-		for col in self.__dataframe.columns:
-			if 'Unnamed' in col:
-				self.__dataframe = self.__dataframe.drop(labels=[col], axis=1)
+		self.drop_unnamed_columns()
 		print(self.__dataframe)
 
 
-	def authenticate(self, username: str, password: str):
+	def drop_unnamed_columns(self) -> None:
+		"""
+		method 
+		"""
+		for col in self.__dataframe.columns:
+			if 'Unnamed' in col:
+				self.__dataframe = self.__dataframe.drop(labels=[col], axis=1)
+
+
+	def authenticate(self, username: str, password: str) -> True or None:
 		"""
 		method attempts to authenticate a user based on the values of username and password
 		:param username: str
@@ -116,14 +127,13 @@ class Authenticator:
 				return True
 		return None
 
-	def sign_up(self, username: str, password: str, password_conf: str):
+	def sign_up(self, username: str, password: str, password_conf: str) -> Tuple[None, str] or Tuple[bool, None]:
 		"""
 		method attempts to sign up a user with the information supplied
 		:param username: str
 		:param password: str
 		:param password_conf: str
-		:param canvas: object
-		:return: state: None or True, e_type: str
+		:return: Tuple(None, str) or Tuple(bool, None)
 		"""
 		NUMBERS = "0123456789"
 
@@ -148,20 +158,12 @@ class Authenticator:
 		if not password == password_conf:
 			return None, 'PASS_NE'
 
-		new_user_dict = {'username': username, 'password': password}
-		self.__dataframe.append(new_user_dict, ignore_index=True)
-
-		subprocess.call(['rm', 'C://Users/vince/Desktop/Team-4/whiteboards/userdata/new_users.xls'])
-
-		subprocess.call(['touch', 'C://Users/vince/Desktop/Team-4/whiteboards/userdata/new_users.xls'])
-
-		self.__dataframe.to_excel(
-			os.path.join('whiteboards', 'userdata', 'new_users.xls'),
-			engine='xlwt'
-		)
-
-		self.encrypt_file(target=os.path.join('whiteboards', 'userdata', 'new_users.xls'), outpath=os.path.join('whiteboards', 'userdata', 'new_users.xls'))
-
+		self.decrypt_file(target=self.userdata_file)
+		new_frame = pd.DataFrame([[username, password]], columns=['username', 'password'], index=[len(self.__dataframe)])
+		self.__dataframe = pd.concat([self.__dataframe, new_frame], verify_integrity=True)
+		self.drop_unnamed_columns()
+		self.__dataframe.to_excel(self.userdata_file, engine='xlwt')
+		self.encrypt_file(target=self.userdata_file)
 		
 		# TODO: Add the username and password to the current dataframe, encrypt it and rewrite the current file enc_users.xls
 		# TODO: Research saving dataframes and adding entries before git flow finishing the feature

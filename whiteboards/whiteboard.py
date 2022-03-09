@@ -136,3 +136,4 @@ class WhiteboardInstance(Tk):
 		self.protocol("WM_DELETE_WINDOW", self.close_window)
 
 		self.mainloop()
+

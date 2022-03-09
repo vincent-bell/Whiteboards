@@ -253,3 +253,4 @@ class WhiteboardApp(Tk):
 		self.protocol("WM_DELETE_WINDOW", self.close_app)
 
 		self.mainloop()
+
