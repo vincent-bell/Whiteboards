@@ -1,8 +1,7 @@
 	# absolute imports
 import os
 import subprocess
-import xlrd
-import xlwt
+import openpyxl
 import pandas as pd
 from pathlib import Path
 from typing import Tuple
@@ -32,7 +31,7 @@ class Authenticator:
 			'whiteboards', 'security', 'unlock.key'
 		)
 		self.userdata_file = os.path.join(
-			'whiteboards', 'userdata', 'enc_users.xls'
+			'whiteboards', 'userdata', 'enc_users.xlsx'
 		)
 		
 		if key:
@@ -96,7 +95,7 @@ class Authenticator:
 		:return: None
 		"""
 		self.decrypt_file(target=self.userdata_file)
-		dataframe = pd.read_excel(self.userdata_file, engine='xlrd')
+		dataframe = pd.read_excel(self.userdata_file, engine='openpyxl')
 		self.encrypt_file(target=self.userdata_file)
 		self.__dataframe = dataframe
 		self.drop_unnamed_columns()
@@ -162,7 +161,7 @@ class Authenticator:
 		new_frame = pd.DataFrame([[username, password]], columns=['username', 'password'], index=[len(self.__dataframe)])
 		self.__dataframe = pd.concat([self.__dataframe, new_frame], verify_integrity=True)
 		self.drop_unnamed_columns()
-		self.__dataframe.to_excel(self.userdata_file, engine='xlwt')
+		self.__dataframe.to_excel(self.userdata_file, engine='openpyxl')
 		self.encrypt_file(target=self.userdata_file)
 		
 		# TODO: Add the username and password to the current dataframe, encrypt it and rewrite the current file enc_users.xls
