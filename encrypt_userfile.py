@@ -2,14 +2,27 @@ import os
 import subprocess
 import pandas as pd
 from whiteboards.security.authentication import Authenticator
+from whiteboards.utils.errors import SetupError
 
 
-if __name__ == '__main__':
+WARNING = "[Setup Fatal Error] Could not find enc_users.xlsx"
+
+
+def setup():
+    """
+    function attempts to build enc_users.xlsx if it does not exist
+    :return: None
+    """
     target_path = os.path.join('whiteboards', 'userdata', 'users.xlsx')
-    authenticator = Authenticator()
-    new_dataframe = pd.DataFrame([['default', 'password']], columns=['username', 'password'], index=[0])
-    new_dataframe.to_excel(
-        os.path.join('whiteboards', 'userdata', 'users.xlsx'),
-        engine='openpyxl'
-    )
-    authenticator.encrypt_file(target='whiteboards/userdata/users.xlsx', outpath='whiteboards/userdata/enc_users.xlsx')
+    essential_path = os.path.join('whiteboards', 'userdata', 'enc_users.xlsx')
+    if os.path.exists(target_path) and not os.path.exists(essential_path):
+        authenticator = Authenticator()
+        new_dataframe = pd.DataFrame([['default', 'password']], columns=['username', 'password'], index=[0])
+        new_dataframe.to_excel(
+            os.path.join('whiteboards', 'userdata', 'users.xlsx'),
+            engine='openpyxl'
+        )
+        authenticator.encrypt_file(target='whiteboards/userdata/users.xlsx', outpath='whiteboards/userdata/enc_users.xlsx')
+    else:
+        if not os.path.exists(essential_path):
+            raise SetupError(WARNING)
