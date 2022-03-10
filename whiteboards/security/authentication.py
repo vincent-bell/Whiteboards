@@ -164,7 +164,4 @@ class Authenticator:
 		self.__dataframe.to_excel(self.userdata_file, engine='openpyxl')
 		self.encrypt_file(target=self.userdata_file)
 		
-		# TODO: Add the username and password to the current dataframe, encrypt it and rewrite the current file enc_users.xls
-		# TODO: Research saving dataframes and adding entries before git flow finishing the feature
-
 		return True, None
