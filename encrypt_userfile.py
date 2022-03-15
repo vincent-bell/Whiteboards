@@ -19,10 +19,10 @@ def setup():
         authenticator = Authenticator()
         new_dataframe = pd.DataFrame([['default', 'password']], columns=['username', 'password'], index=[0])
         new_dataframe.to_excel(
-            os.path.join('whiteboards', 'userdata', 'users.xlsx'),
+            target_path,
             engine='openpyxl'
         )
-        authenticator.encrypt_file(target='whiteboards/userdata/users.xlsx', outpath='whiteboards/userdata/enc_users.xlsx')
+        authenticator.encrypt_file(target=target_path, outpath=essential_path)
     else:
         if not os.path.exists(essential_path):
             raise SetupError(WARNING)
