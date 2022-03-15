@@ -226,7 +226,7 @@ class WhiteboardApp(Tk):
 				att_user=username_box.get(),
 				att_pass=password_box.get(),
 				canvas=canvas
-			)											   	
+			)
 		)
 		self.login_button.place(x=316, y=333, width=70, height=32)
 
