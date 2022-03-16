@@ -2,6 +2,8 @@ from tkinter import Tk, Canvas, Menu
 
 
 class WhiteboardInstance(Tk):
+	state = 'create-circle' # default state
+	
 	def __init__(self, instantiator):
 		super().__init__()
 		self.instantiator = instantiator
@@ -9,6 +11,8 @@ class WhiteboardInstance(Tk):
 
 		self.current_x, self.current_y = (0,0)
 		self.drawing_colour = 'black'
+
+		self.next_unbind = None
 
 
 	def __call__(self):
@@ -70,6 +74,8 @@ class WhiteboardInstance(Tk):
 		id = self.active_canvas.create_rectangle((10, 250, 30, 270), fill='purple')
 		self.active_canvas.tag_bind(id, '<Button-1>', lambda colour: self.change_colour('purple'))
 
+		
+
 
 	def locate_xy(self, event: object):
 		"""
@@ -95,6 +101,14 @@ class WhiteboardInstance(Tk):
 		self.current_x, self.current_y = (event.x, event.y)
 
 
+	def draw_oval(self, event: object):
+		
+		self.active_canvas.create_oval(
+			(self.current_x, self.current_y, event.x, event.y),
+			outline=self.drawing_colour
+		)
+
+
 	def new_whiteboard(self):
 		"""
 		method clears the canvas
@@ -102,6 +116,24 @@ class WhiteboardInstance(Tk):
 		"""
 		self.active_canvas.delete('all')
 		self.build_palette()
+
+
+	def switch_bindings(self):
+		
+		if self.next_unbind == 'drawing':
+			self.active_canvas.unbind('<B1-Motion>')
+			
+		elif self.next_unbind == 'create-circle':
+			self.active_canvas.unbind('<ButtonRelease-1>')
+
+
+		if WhiteboardInstance.state == 'drawing':
+			self.active_canvas.bind('<B1-Motion>', self.draw_line)
+			self.next_unbind = 'drawing'
+
+		elif WhiteboardInstance.state == 'create-circle':
+			self.active_canvas.bind('<ButtonRelease-1>', self.draw_oval)
+			self.next_unbind = 'create-circle'
 
 
 	def build(self):
@@ -127,13 +159,14 @@ class WhiteboardInstance(Tk):
 
 		self.active_canvas = Canvas(master=self, bg='white')
 		self.active_canvas.grid(row=0, column=0, sticky='nsew')
-
-		self.active_canvas.bind('<Button-1>', self.locate_xy)
-		self.active_canvas.bind('<B1-Motion>', self.draw_line)
+        
+		self.active_canvas.bind('<Button-1>', lambda event: [
+			self.locate_xy(event),
+			self.switch_bindings()
+		])
 
 		self.build_palette()
 
 		self.protocol("WM_DELETE_WINDOW", self.close_window)
 
 		self.mainloop()
-
