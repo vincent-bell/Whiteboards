@@ -21,11 +21,6 @@ WARNING = "[Security Warning] You must link the new key in others/whiteboards/se
 
 
 class Authenticator:
-	"""
-	class to handle the authentication and sign up of users for the whiteboards app.
-	:param key: bytes
-	:return: None
-	"""
 	def __init__(self, key: bytes = os.environ.get(DATA_KEY)):
 		self.key_path = os.path.join(
 			'whiteboards', 'security', 'unlock.key'
@@ -43,7 +38,7 @@ class Authenticator:
 
 	def make_new_key(self) -> None:
 		"""
-		method generates a new key and writes it to the path in self.key_path
+		This method generates a new key and writes it to the path in self.key_path.
 		:return: None
 		"""
 		key = Fernet.generate_key()
@@ -53,8 +48,7 @@ class Authenticator:
 
 	def encrypt_file(self, target: Path, outpath: Path = None) -> None:
 		"""
-		method encrypts a file specified in file_path with a key specified
-		in key and writes the contents to either a specified outpath or the original file
+		This method encrypts a file specified by target with the key specified in $env:SECRET_KEY
 		:param file_path: Path
 		:param outpath: Path
 		:return: None
@@ -76,8 +70,7 @@ class Authenticator:
 
 	def decrypt_file(self, target: Path) -> None:
 		"""
-		method decrypts the file in file_path with the key specified in key
-		set self.key once an unlock.key file is set? 
+		This method decrypts the file specified by target with the key specified in $env:SECRET_KEY.
 		:param file_path: Path
 		:return file_contents: bytes
 		"""
@@ -91,7 +84,8 @@ class Authenticator:
 
 	def decrypt_dataframe(self) -> None:
 		"""
-		method sets up self.__dataframe
+		This method decrypts the userdata and stores the registered users
+		in a private attribute self.__dataframe.
 		:return: None
 		"""
 		self.decrypt_file(target=self.userdata_file)
@@ -104,7 +98,9 @@ class Authenticator:
 
 	def drop_unnamed_columns(self) -> None:
 		"""
-		method 
+		This method drops unnamed columns from self.__dataframe which are generated
+		as excess columns when a new user is registered.
+
 		"""
 		for col in self.__dataframe.columns:
 			if 'Unnamed' in col:
@@ -113,7 +109,7 @@ class Authenticator:
 
 	def authenticate(self, username: str, password: str) -> True or None:
 		"""
-		method attempts to authenticate a user based on the values of username and password
+		This method attempts to authenticate a user based on the values of username and password.
 		:param username: str
 		:param password: str
 		:return: True or None
@@ -128,7 +124,7 @@ class Authenticator:
 
 	def sign_up(self, username: str, password: str, password_conf: str) -> Tuple[None, str] or Tuple[bool, None]:
 		"""
-		method attempts to sign up a user with the information supplied
+		This method attempts to sign up a user with the information supplied.
 		:param username: str
 		:param password: str
 		:param password_conf: str
