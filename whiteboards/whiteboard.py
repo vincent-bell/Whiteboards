@@ -1,4 +1,5 @@
 from tkinter import Tk, Canvas, Menu
+from tkinter.filedialog import asksaveasfile
 
 
 class WhiteboardInstance(Tk):
@@ -121,6 +122,25 @@ class WhiteboardInstance(Tk):
 		"""
 		self.active_canvas.delete('all')
 		self.build_palette()
+	
+	def save_whiteboard(self):
+		"""
+		This method allows a user to save a whiteboard state as a png image
+		:return: None
+		"""
+		whiteboard_image = None
+		# somehow obtain a jpg/png image of the whiteboard in bytes format in a variable
+		# maybe PIL or ImageMagik?
+		file = asksaveasfile(
+			mode='wb',
+			initialfile='Untitled.png',
+			defaultextension=".png",
+			filetypes=[("All Files", "*.*"), ("Png Image", "*.png")]
+		)
+		file.write(whiteboard_image)
+		print(file)
+
+		file.close()
 
 
 	def switch_bindings(self):
@@ -160,7 +180,7 @@ class WhiteboardInstance(Tk):
 
 		menubar.add_cascade(label='File', menu=submenu)
 		submenu.add_command(label='New Whiteboard', command=self.new_whiteboard)
-		submenu.add_command(label='Save Whiteboard', command=lambda: print(NotImplemented))
+		submenu.add_command(label='Save Whiteboard', command=self.save_whiteboard)
 
 		self.active_canvas = Canvas(master=self, bg='white')
 		self.active_canvas.grid(row=0, column=0, sticky='nsew')
