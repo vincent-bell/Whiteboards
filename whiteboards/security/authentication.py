@@ -1,7 +1,6 @@
 # absolute imports
 import os
 import subprocess
-import openpyxl
 import pandas as pd
 from pathlib import Path
 from typing import Tuple

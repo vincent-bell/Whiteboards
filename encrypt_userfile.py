@@ -1,5 +1,4 @@
 import os
-import subprocess
 import pandas as pd
 from whiteboards.security.authentication import Authenticator
 from whiteboards.utils.errors import SetupError
