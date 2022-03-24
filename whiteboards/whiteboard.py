@@ -75,7 +75,15 @@ class WhiteboardInstance(Tk):
 		id = self.active_canvas.create_rectangle((10, 280, 30, 300), fill='purple')
 		self.active_canvas.tag_bind(id, '<Button-1>', lambda colour: self.change_colour('purple'))
 
-		
+
+	def build_tools(self):
+		"""
+		This method builds the tools to the right of the whiteboard:
+		Pen, Paint Brush, Create-Circle, Sticky Notes which should be
+		images bound to tags on the self.active_canvas object.
+		"""
+		# to the right of the screen
+		NotImplemented
 
 
 	def locate_xy(self, event: object):
@@ -122,7 +130,8 @@ class WhiteboardInstance(Tk):
 		"""
 		self.active_canvas.delete('all')
 		self.build_palette()
-	
+
+
 	def save_whiteboard(self):
 		"""
 		This method allows a user to save a whiteboard state as a png image
