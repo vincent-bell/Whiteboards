@@ -4,45 +4,22 @@ import subprocess
 import pandas as pd
 from pathlib import Path
 from typing import Tuple
-try:
-	from cryptography.fernet import Fernet
-except ModuleNotFoundError:
-	subprocess.call(['pip', 'install', 'cryptography'])
-	from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet
 
 # relative imports
 from ..utils.errors import SecurityError
 
 
-DATA_KEY = 'SECRET_KEY'
-ENCODING_FORMAT = 'utf-8'
-WARNING = "[Security Warning] You must link the new key in others/whiteboards/security/unlock.key"
+ENCRYPTION_KEY = "2t2eEDW62bP7mAt80GxekbjJacR44XBJHSeZBXA2E6o="
+ENCODING_FORMAT = "utf-8"
 
 
 class Authenticator:
-	def __init__(self, key: bytes = os.environ.get(DATA_KEY)):
-		self.key_path = os.path.join(
-			'whiteboards', 'security', 'unlock.key'
-		)
+	def __init__(self, key: bytes = ENCRYPTION_KEY):
+		self.__key = bytes(key, ENCODING_FORMAT)
 		self.userdata_file = os.path.join(
 			'whiteboards', 'userdata', 'enc_users.xlsx'
 		)
-		
-		if key:
-			self.__key = bytes(key, ENCODING_FORMAT)
-		else:
-			self.make_new_key()
-			raise SecurityError(WARNING)
-
-
-	def make_new_key(self) -> None:
-		"""
-		This method generates a new key and writes it to the path in self.key_path.
-		:return: None
-		"""
-		key = Fernet.generate_key()
-		with open(self.key_path, 'wb') as unlock:
-			unlock.write(key)
 
 
 	def encrypt_file(self, target: Path, outpath: Path = None) -> None:
@@ -92,7 +69,6 @@ class Authenticator:
 		self.encrypt_file(target=self.userdata_file)
 		self.__dataframe = dataframe
 		self.drop_unnamed_columns()
-		print(self.__dataframe)
 
 
 	def drop_unnamed_columns(self) -> None:
@@ -140,8 +116,7 @@ class Authenticator:
 			else:
 				return None, 'ALPHABET_E'
 
-		data_len = len(self.__dataframe)
-		for userid in range(data_len):
+		for userid in range(len(self.__dataframe)):
 			existing_user = self.__dataframe.username[userid]
 			if username == existing_user:
 				return None, 'A_EXIST' 

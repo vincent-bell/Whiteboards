@@ -7,17 +7,13 @@ from guizero import App
 from .whiteboard import WhiteboardInstance
 from .security.authentication import Authenticator
 
-'''
-for now a valid user is: {username = "test", password = "test"}
-'''
-
 
 class WhiteboardApp(Tk):
 	def __init__(self, base_widget: App = None):
 		super().__init__()
 		self.authenticator = Authenticator()
 		self.authenticator.decrypt_dataframe()
-
+		
 		self.assets_path_init = os.path.join('whiteboards', 'assets', 'init')
 		self.assets_path_signup = os.path.join('whiteboards', 'assets', 'sign_up')
 

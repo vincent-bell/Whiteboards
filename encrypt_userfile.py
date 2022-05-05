@@ -4,12 +4,12 @@ from whiteboards.security.authentication import Authenticator
 from whiteboards.utils.errors import SetupError
 
 
-WARNING = "[Setup Fatal Error] Could not find enc_users.xlsx"
+WARNING = "[Setup Fatal Error] Could not find users.xlsx or enc_users.xlsx"
 
 
 def setup():
     """
-    function attempts to build enc_users.xlsx if it does not exist
+    Function attempts to build enc_users.xlsx from users.xlsx if it does not exist.
     :return: None
     """
     target_path = os.path.join('whiteboards', 'userdata', 'users.xlsx')
@@ -23,5 +23,5 @@ def setup():
         )
         authenticator.encrypt_file(target=target_path, outpath=essential_path)
     else:
-        if not os.path.exists(essential_path):
+        if not os.path.exists(target_path) and not os.path.exists(essential_path):
             raise SetupError(WARNING)
