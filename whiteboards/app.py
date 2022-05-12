@@ -126,7 +126,7 @@ class WhiteboardApp(Tk):
 			file=os.path.join(self.assets_path_signup, 'entry_box.png')
 		)
 		canvas.create_image(163.5, 230, image=password_box_img)
-		password_box = Entry(master=canvas, bd=0, bg='#E3E3E3', highlightthickness=0)
+		password_box = Entry(master=canvas, bd=0, bg='#E3E3E3', highlightthickness=0, show='*')
 		password_box.place(x=111, y=221, width=105, height=16)
 
 		confirm_password_box_img = PhotoImage(
@@ -134,7 +134,7 @@ class WhiteboardApp(Tk):
 			file=os.path.join(self.assets_path_signup, 'entry_box.png')
 		)
 		canvas.create_image(163.5, 187, image=confirm_password_box_img)
-		confirm_password_box = Entry(master=canvas, bd=0, bg='#E3E3E3', highlightthickness=0)
+		confirm_password_box = Entry(master=canvas, bd=0, bg='#E3E3E3', highlightthickness=0, show='*')
 		confirm_password_box.place(x=111, y=178, width=105, height=16)
 
 		signup_button_img = PhotoImage(
